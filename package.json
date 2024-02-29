@@ -16,6 +16,8 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "mongodb": "^6.3.0",
-    "mongoose": "^8.2.0"
+    "mongoose": "^8.2.0",
+    "mongoose-uuid-ts": "^1.0.4",
+    "uuid": "^9.0.1"
   }
 }
