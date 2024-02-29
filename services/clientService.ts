@@ -17,16 +17,27 @@ const createClient = async ({name, type}) => {
 const addAccount = async ({name, uuid}) => {
     const u = await Client.updateOne({name}, { $push: { accounts: uuid } })
 }
-const delClient = {}
-const updateClient = {}
-const getClient = {}
-const listClients = {}
+const delClient = async ({name}) => {
+    const d = await Client.deleteOne({name})
+}
+const getClient = async ({name}) => {
+    const c = await Client.findOne({name}).populate({
+        path: 'accounts',
+        model: 'Account',
+        select: 'bank currency amount',
+        foreignField: 'uuid',
+      })
+    return c
+}
+const listClients = async () => { 
+    const clients = await Client.find()
+    return clients
+ }
 
 
 export {
     createClient,
     delClient,
-    updateClient,
     getClient,
     listClients, 
     addAccount

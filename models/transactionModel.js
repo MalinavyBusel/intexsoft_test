@@ -6,6 +6,7 @@ const transactionSchema = new mongoose.Schema({
 //   type
 //   accounts
 //   transactions
+//  client ?????
 });
 
 const Transaction = mongoose.model('Transaction', TransactionSchema);

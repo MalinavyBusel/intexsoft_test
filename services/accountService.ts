@@ -18,6 +18,9 @@ const createAcc = async ({bank, client, currency, amount}) => {
     // push this uuid to client model account list
 }
 const delAcc = {}
+const delAccsOfClient = async ({bank, client}) => {
+  const d = await Account.deleteMany({bank, client})
+}
 const updateAcc = {}
 const getAcc = {}
 const listAcc = {}
@@ -28,5 +31,6 @@ export {
     delAcc,
     updateAcc,
     getAcc,
-    listAcc
+    listAcc, 
+    delAccsOfClient
 }
