@@ -12,5 +12,10 @@
   "devDependencies": {
     "@types/node": "^20.11.22",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.2.0"
   }
 }

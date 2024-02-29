@@ -1,8 +1,12 @@
 import { Handler } from "./handlers/handler"
 
 const readline = require('node:readline')
-const {parseArgs} = require('node:util')
-     
+const mongoose = require('mongoose')
+require('dotenv').config();
+const process = require('process')
+
+const url = process.env.MONGO_URL;
+mongoose.connect(url);
 
 module.exports = class Program {
     mapping: Map<String, Handler>
@@ -45,8 +49,4 @@ function processPrompt(str: String): {handler: String; cmd: String; args: string
     const cmd = strSplitted[1]
     const args = strSplitted.slice(2)
     return {handler: handlerName, cmd, args}
-    // const handlerName = str.slice(0, str.indexOf(' ')) || 'default';
-    // str = str.slice(str.indexOf(' '))
-    // const cmd = str.slice(0, str.indexOf(' ')) || 'default';
-    // return {handler: handlerName, cmd, args: str.slice(str.indexOf(' ')).trim()}
 }
