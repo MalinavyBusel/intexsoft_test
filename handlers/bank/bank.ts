@@ -1,7 +1,7 @@
 import { parseArgs } from "util"
 import { Handler, methodObj } from "../handler"
 
-import {create, del, update, get} from '../../services/bankService'
+import {create, del, update, get, list} from '../../services/bankService'
 
 module.exports =  class BankHandler implements Handler {
     handlerName: String
@@ -13,13 +13,18 @@ module.exports =  class BankHandler implements Handler {
                   type: 'string',
                   short: 'n',
                 },
-                comission: {
+                e: {
                   type: 'string',
                   short: 'c',
                   default: '0'
                 },
+                i: {
+                    type: 'string',
+                    short: 'c',
+                    default: '0'
+                },
               },
-            call: this.create,
+            call: this.create_bank,
         }],
         ["delete", {
             description: "Deletes a bank",
@@ -29,7 +34,7 @@ module.exports =  class BankHandler implements Handler {
                   short: 'n',
                 },
               },
-            call: this.delete,
+            call: this.delete_bank,
         }],
         ["update", {
             description: "Ubdates bank's name or comission",
@@ -42,13 +47,16 @@ module.exports =  class BankHandler implements Handler {
                     type: 'string',
                     short: 'r',
                 },
-                comission: {
+                e: {
                     type: 'string',
                     short: 'c',
-                    default: '0'
                   },
+                i: {
+                      type: 'string',
+                      short: 'c',
+                },
               },
-            call: this.update,
+            call: this.update_bank,
         }],
         ["read", {
             description: "Returns info about bank by its name",
@@ -58,7 +66,12 @@ module.exports =  class BankHandler implements Handler {
                   short: 'n',
                 },
               },
-            call: this.read,
+            call: this.read_bank,
+        }],
+        ["list", {
+            description: "Returns info about all banks",
+            options: {},
+            call: this.list_banks,
         }],
     ])
     constructor() {
@@ -71,25 +84,59 @@ module.exports =  class BankHandler implements Handler {
 
         // parse the cli arguments
         const options = method.options
-        const values: Object = parseArgs({args, options}).values
+        const values: Object = parseArgs({args, options, allowPositionals: true}).values
 
         console.log(await method.call(values))
     }
 
-    private create(args: any) {
+    private async create_bank(args: any) {
         console.log('Hii, i"m there with values', args)
-        create(args)
+        if (!isset(args.name)) {
+            return "Please, provide a valid name of a bank with '-n <name>'"
+        }
+        args.i = Number(args.i)
+        if (Number.isNaN(args.i) || args.i < 0) {
+            return "Please, provide a positive number in individual comission"
+        }
+        args.e = Number(args.e)
+        if (Number.isNaN(args.e) || args.e < 0) {
+            return "Please, provide a positive number in entity comission"
+        }
+        return await create(args)
     }
 
-    private async read(args: any) {
+    private async read_bank(args: any) {
+        if (!isset(args.rename)) {
+            return "Please, provide a valid name of a bank with '-n <name>'"
+        }
         return await get(args)
     }
 
-    private update(args: any) {
-        update(args)
+    private async update_bank(args: any) {
+        if (!isset(args.name)) {
+            return "Please, provide a valid name of a bank with '-n <name>'"
+        }
+        if (!isset(args.rename) && !isset(args.e) && !isset(args.i)) {
+            return "Please, provide at least one field to update"
+        }
+        args.i = Number(args.i)
+        args.e = Number(args.e)
+        return await update(args)
     }
 
-    private delete(args: any) {
-        del(args)
+    private async delete_bank(args: any) {
+        if (!isset(args.rename)) {
+            return "Please, provide a valid name of a bank with '-n <name>'"
+        }
+    
+        return await del(args)
     }
+
+    private async list_banks(args:any) {
+        return await list()
+    }
+}
+
+function isset(param: undefined | String): Boolean {
+    return param != undefined && param != ''
 }

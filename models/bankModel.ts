@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const bankSchema = new mongoose.Schema({
   name: String,
-  comission: Number,
+  entity_comission: Number,  
+  individual_comission: Number,
 });
 
 const Bank = mongoose.model('Bank', bankSchema);
