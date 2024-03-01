@@ -14,8 +14,8 @@ import {
 import {get, get as getBank} from '../../services/bankService'
 
 module.exports =  class ClientHandler implements Handler {
-    handlerName: String
-    mapping: Map<String, methodObj> = new Map([
+    handlerName: string
+    mapping: Map<string, methodObj> = new Map([
         ["create", {
             description: `Creates a client and account for him
 -n -- client name
@@ -286,6 +286,6 @@ No options provided`,
     }
 }
 
-function isset(param: undefined | String): Boolean {
+function isset(param: undefined | string): boolean {
     return param != undefined && param != ''
 }

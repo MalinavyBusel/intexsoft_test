@@ -4,8 +4,8 @@ import { Handler, methodObj } from "../handler"
 import {create, del, update, get, list} from '../../services/bankService'
 
 module.exports =  class BankHandler implements Handler {
-    handlerName: String
-    mapping: Map<String, methodObj> = new Map([
+    handlerName: string
+    mapping: Map<string, methodObj> = new Map([
         ["create", {
             description: `Creates a bank
 -n -- name
@@ -167,6 +167,6 @@ no options required`,
     }
 }
 
-function isset(param: undefined | String): Boolean {
+function isset(param: undefined | string): boolean {
     return param != undefined && param != ''
 }

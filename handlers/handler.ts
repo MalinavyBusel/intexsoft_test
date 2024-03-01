@@ -1,11 +1,11 @@
 export interface Handler {
-    handlerName: String,
-    apply(cmd: String, args: string[])
+    handlerName: string,
+    apply(cmd: string, args: string[])
     iterate()
 }
 
 export type methodObj = {
-    description: String,
+    description: string,
     options: any,
     call: Function
 }

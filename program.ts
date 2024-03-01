@@ -9,7 +9,7 @@ const url = process.env.MONGO_URL;
 mongoose.connect(url);
 
 module.exports = class Program {
-    mapping: Map<String, Handler>
+    mapping: Map<string, Handler>
     constructor(
         ...handlers
     ) {
@@ -22,7 +22,7 @@ module.exports = class Program {
     }
 
     async Serve() {
-        function readInput(): Promise<String> {
+        function readInput(): Promise<string> {
             const i = readline.createInterface({
                 input: process.stdin,
                 output: process.stdout,
@@ -35,8 +35,8 @@ module.exports = class Program {
         }
 
         while (true) {
-            let prompt = await readInput()
-            let {handler, cmd, args} = processPrompt(prompt)
+            const prompt = await readInput()
+            const {handler, cmd, args} = processPrompt(prompt)
             console.log("params: ", handler, cmd, args)
             const handlerObj = this.mapping.get(handler)
 
@@ -60,7 +60,7 @@ module.exports = class Program {
     }
 }
 
-function processPrompt(str: String): {handler: String; cmd: String; args: string[];} {
+function processPrompt(str: string): {handler: string; cmd: string; args: string[];} {
     const strSplitted = str.split(' ')
     const handlerName = strSplitted[0]
     const cmd = strSplitted[1]
