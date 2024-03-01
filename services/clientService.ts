@@ -24,7 +24,7 @@ const getClient = async ({name}) => {
     const c = await Client.findOne({name}).populate({
         path: 'accounts',
         model: 'Account',
-        select: 'bank currency amount -_id -__v',
+        select: 'bank currency amount -_id',
         foreignField: 'uuid',
       })
     return c

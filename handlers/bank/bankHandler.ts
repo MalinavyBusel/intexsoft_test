@@ -99,6 +99,10 @@ no options required`,
     async apply(cmd: string, args: string[]) {
         console.log(`getting a ${cmd} command`)
         const method = this.mapping.get(cmd)
+        if (method == undefined) {
+            console.log("No such method for banks")
+            return
+        }
 
         // parse the cli arguments
         const options = method.options
@@ -120,11 +124,15 @@ no options required`,
         if (Number.isNaN(args.e) || args.e < 0) {
             return "Please, provide a positive number in entity comission"
         }
+        const b = await get({name: args.name})
+        if (b != null) {
+            return "Bank with such name already exists"
+        }
         return await create(args)
     }
 
     private async read_bank(args: any) {
-        if (!isset(args.rename)) {
+        if (!isset(args.name)) {
             return "Please, provide a valid name of a bank with '-n <name>'"
         }
         return await get(args)
@@ -137,13 +145,17 @@ no options required`,
         if (!isset(args.rename) && !isset(args.e) && !isset(args.i)) {
             return "Please, provide at least one field to update"
         }
+        const b = await get({name: args.rename})
+        if (b != null) {
+            return `Bank with name ${args.rename} already exists`
+        }
         args.i = Number(args.i)
         args.e = Number(args.e)
         return await update(args)
     }
 
     private async delete_bank(args: any) {
-        if (!isset(args.rename)) {
+        if (!isset(args.name)) {
             return "Please, provide a valid name of a bank with '-n <name>'"
         }
     

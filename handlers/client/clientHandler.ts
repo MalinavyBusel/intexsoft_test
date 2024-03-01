@@ -7,12 +7,11 @@ import {UUID} from 'mongodb'
 import {createAcc, delAccsOfClient, getAcc, getTransactions, makeBankTransaction} from '../../services/accountService'
 import {
     createClient,
-    delClient,
     getClient,
     listClients,
     addAccount
 } from '../../services/clientService'
-import {get as getBank} from '../../services/bankService'
+import {get, get as getBank} from '../../services/bankService'
 
 module.exports =  class ClientHandler implements Handler {
     handlerName: String
@@ -40,6 +39,7 @@ module.exports =  class ClientHandler implements Handler {
                 currency: {
                     type: 'string',
                     short: 'c',
+                    default: 'dollar'
                 },
                 amount: {
                     type: 'string',
@@ -49,7 +49,7 @@ module.exports =  class ClientHandler implements Handler {
               },
             call: this.create_client,
         }],
-        ["delete", {
+        ["deleteAccs", {
             description: `Deletes all client accounts from a bank
 -n -- client name
 -b -- bank name`,
@@ -72,7 +72,7 @@ module.exports =  class ClientHandler implements Handler {
 -c -- currency
 -a -- amount of money from start on the bind account`,
             options: {
-                options: {
+                
                     clientName: {
                       type: 'string',
                       short: 'n',
@@ -84,13 +84,14 @@ module.exports =  class ClientHandler implements Handler {
                     currency: {
                         type: 'string',
                         short: 'c',
+                        default: 'dollar'
                     },
                     amount: {
                         type: 'string',
                         short: 'a',
                         default: '0',
                     },
-                  },
+                  
               },
             call: this.add_account,
         }],
@@ -173,6 +174,10 @@ No options provided`,
     async apply(cmd: string, args: string[]) {
         console.log(`getting a ${cmd} command`)
         const method = this.mapping.get(cmd)
+        if (method == undefined) {
+            console.log("No such method for clients")
+            return
+        }
 
         // parse the cli arguments
         const options = method.options
@@ -182,11 +187,22 @@ No options provided`,
     }
 
     private async create_client(args: any) {
+        const exists = await getClient({name: args.clientName})
+        if (exists != null) {
+            return 'Client with such name already exists'
+        }
+        if (args.clientType != 'entity' && args.clientType != 'individual') {
+            return "Provide valid account type"
+        }
+        const bank = await get({name: args.bank})
+        if (bank == null) {
+            return "No bank with such name"
+        }
         //create client
         const c = await createClient({name: args.clientName, type: args.clientType})
 
         //create account
-        const a = await createAcc({bank: args.bank, client: args.clientName, currency: args.currency, amount: args.amount})
+        const a = await createAcc({bank: args.bank, client: args.clientName, currency: Number(args.currency), amount: args.amount})
 
         //push account
         const p = await addAccount({name: args.clientName, uuid: a.uuid})
@@ -198,7 +214,15 @@ No options provided`,
         return a
     }
     private async add_account(args: any) {
-        const a = await createAcc({bank: args.bank, client: args.clientName, currency: args.currency, amount: args.amount})
+        const exists = await getClient({name: args.clientName})
+        if (exists == null) {
+            return 'No such client'
+        }
+        const bank = await get({name: args.bank})
+        if (bank == null) {
+            return "No bank with such name"
+        }
+        const a = await createAcc({bank: args.bank, client: args.clientName, currency: args.currency, amount: Number(args.amount)})
         const p = await addAccount({name: args.clientName, uuid: a.uuid})
         return p
     }
@@ -213,7 +237,18 @@ No options provided`,
         if (isNaN(args.amount) || args.amount < 0) {
             return 'Please, enter valid amount of money'
         }
-
+        const t = await getAcc({uuid: args.to})
+        if (t == null) {
+            return "Sender is invalid - provide another uuid"
+        }
+        const f = await getAcc({uuid: args.from})
+        if (f == null) {
+            return "Reciever is invalid - provide another uuid"
+        }
+        const exists = await getClient({name: args.clientName})
+        if (exists == null) {
+            return 'No such client'
+        }
         //check if from-acc is client's
         const from = await getAcc({uuid: UUID.createFromHexString(args.from)})
         console.log(from)
@@ -238,13 +273,15 @@ No options provided`,
         }
         //start transaction with recounting accounts
         console.log('comissions', beforeComission, afterComission)
-        const t = await makeBankTransaction({client: client.name, amountFrom: afterComission, amountTo: beforeComission, from, to})
-        return t
-
-        //return await createPayment()
+        const transac = await makeBankTransaction({client: client.name, amountFrom: afterComission, amountTo: beforeComission, from, to})
+        return transac
     }
     private async getTransactions(args: any) {
         console.log(args)
+        const exists = await getClient({name: args.clientName})
+        if (exists == null) {
+            return 'No such client'
+        }
         return await getTransactions({start: args.start, end: args.end, name: args.clientName})
     }
 }
