@@ -18,7 +18,12 @@ module.exports =  class ClientHandler implements Handler {
     handlerName: String
     mapping: Map<String, methodObj> = new Map([
         ["create", {
-            description: "Creates a client and account for him",
+            description: `Creates a client and account for him
+-n -- client name
+-t -- client type (entity or individual)
+-b -- bank name
+-c -- currency
+-a -- amount of money from start on the bind account`,
             options: {
                 clientName: {
                   type: 'string',
@@ -45,7 +50,9 @@ module.exports =  class ClientHandler implements Handler {
             call: this.create_client,
         }],
         ["delete", {
-            description: "Deletes a client from a bank",
+            description: `Deletes all client accounts from a bank
+-n -- client name
+-b -- bank name`,
             options: {
                 clientName: {
                   type: 'string',
@@ -59,7 +66,11 @@ module.exports =  class ClientHandler implements Handler {
             call: this.delete_client,
         }],
         ["addAccount", {
-            description: "Registers new account for a client",
+            description: `Registers new account for a client
+-n -- client name
+-b -- bank name
+-c -- currency
+-a -- amount of money from start on the bind account`,
             options: {
                 options: {
                     clientName: {
@@ -84,7 +95,8 @@ module.exports =  class ClientHandler implements Handler {
             call: this.add_account,
         }],
         ["read", {
-            description: "Returns info about client by its name",
+            description: `Returns info about client by its name
+-n -- client name`,
             options: {
                 clientName: {
                   type: 'string',
@@ -94,12 +106,17 @@ module.exports =  class ClientHandler implements Handler {
             call: this.get_client,
         }],
         ["list", {
-            description: "Returns the list of all clients",
+            description: `Returns the list of all clients
+No options provided`,
             options: {},
             call: this.list,
         }],
         ["pay", {
-            description: "Runs a transaction from client's account to another",
+            description: `Runs a transaction from client's account to another
+-f -- account-sender uuid
+-t -- account-reciever uuid
+-n -- name of client who owns account-sender
+-a -- how mush money to send before processing comission`,
             options: {
                 from: {
                     type: 'string',
@@ -121,7 +138,10 @@ module.exports =  class ClientHandler implements Handler {
             call: this.pay,
         }],
         ["transactions", {
-            description: "Returns all the transactions made by client",
+            description: `Returns all the transactions made by client
+-s -- left border datetime (optional)
+-e -- right border daterime, if not set - current date is default
+-n -- name of the client, whose transactions will be returned`,
             options: {
                 start: {
                     type: 'string',
@@ -142,6 +162,13 @@ module.exports =  class ClientHandler implements Handler {
     constructor() {
         this.handlerName = 'client'
     } 
+    iterate() {
+        for (const handleFunc of this.mapping) {
+            console.log('->', handleFunc[0])
+            console.log(handleFunc[1].description)
+            console.log('-------------------')
+        }
+    }
     
     async apply(cmd: string, args: string[]) {
         console.log(`getting a ${cmd} command`)
@@ -168,8 +195,7 @@ module.exports =  class ClientHandler implements Handler {
     }
     private async delete_client(args: any) {
         const a = delAccsOfClient({bank: args.bank, client: args.clientName})
-        const c = delClient({name: args.clientName})
-        return c
+        return a
     }
     private async add_account(args: any) {
         const a = await createAcc({bank: args.bank, client: args.clientName, currency: args.currency, amount: args.amount})

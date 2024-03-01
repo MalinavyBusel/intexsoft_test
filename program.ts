@@ -38,7 +38,24 @@ module.exports = class Program {
             let prompt = await readInput()
             let {handler, cmd, args} = processPrompt(prompt)
             console.log("params: ", handler, cmd, args)
-            this.mapping.get(handler).apply(cmd, args)
+            const handlerObj = this.mapping.get(handler)
+
+            if (handler == 'help') {
+                this.help()
+            } else if (handler == 'exit') {
+                process.exit()
+            } else if (handlerObj == undefined) {
+                console.log('no such command')
+            } else {
+                handlerObj.apply(cmd, args)
+            }
+        }
+    }
+    private help() {
+        for (const handler of this.mapping) {
+            console.log(handler[0])
+            handler[1].iterate()
+            console.log('-------------------\n-------------------')
         }
     }
 }

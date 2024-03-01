@@ -7,7 +7,10 @@ module.exports =  class BankHandler implements Handler {
     handlerName: String
     mapping: Map<String, methodObj> = new Map([
         ["create", {
-            description: "Creates a bank",
+            description: `Creates a bank
+-n -- name
+-e -- comission for entity clients
+-i -- comission for individual clients`,
             options: {
                 name: {
                   type: 'string',
@@ -27,7 +30,8 @@ module.exports =  class BankHandler implements Handler {
             call: this.create_bank,
         }],
         ["delete", {
-            description: "Deletes a bank",
+            description: `Deletes a bank
+-n -- bank name`,
             options: {
                 name: {
                   type: 'string',
@@ -36,8 +40,13 @@ module.exports =  class BankHandler implements Handler {
               },
             call: this.delete_bank,
         }],
-        ["update", {
-            description: "Ubdates bank's name or comission",
+        [`update`, {
+            description: `Ubdates bank's name or comission
+-n -- bank's current name
+-r -- bank's new name (optional)
+-i -- new indivinual comission (optional)
+-e -- new entity comission (optional)
+At least one of optional fields must be provided`,
             options: {
                 name: {
                   type: 'string',
@@ -59,7 +68,8 @@ module.exports =  class BankHandler implements Handler {
             call: this.update_bank,
         }],
         ["read", {
-            description: "Returns info about bank by its name",
+            description: `Returns info about bank by its name
+-n -- bank's name`,
             options: {
                 name: {
                   type: 'string',
@@ -69,7 +79,8 @@ module.exports =  class BankHandler implements Handler {
             call: this.read_bank,
         }],
         ["list", {
-            description: "Returns info about all banks",
+            description: `Returns info about all banks
+no options required`,
             options: {},
             call: this.list_banks,
         }],
@@ -77,6 +88,13 @@ module.exports =  class BankHandler implements Handler {
     constructor() {
         this.handlerName = 'bank'
     } 
+    iterate() {
+        for (const handleFunc of this.mapping) {
+            console.log('->', handleFunc[0])
+            console.log(handleFunc[1].description)
+            console.log('-------------------')
+        }
+    }
     
     async apply(cmd: string, args: string[]) {
         console.log(`getting a ${cmd} command`)
