@@ -56,7 +56,7 @@ module.exports = class Program {
     }
     private help() {
         for (const handler of this.mapping) {
-            console.log(handler[0])
+            console.log(handler[0].toUpperCase())
             handler[1].iterate()
             console.log('-------------------\n-------------------')
         }
