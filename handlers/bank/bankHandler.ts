@@ -97,7 +97,6 @@ no options required`,
     }
     
     async apply(cmd: string, args: string[]) {
-        console.log(`getting a ${cmd} command`)
         const method = this.mapping.get(cmd)
         if (method == undefined) {
             console.log("No such method for banks")
@@ -112,7 +111,6 @@ no options required`,
     }
 
     private async create_bank(args: any) {
-        console.log('Hii, i"m there with values', args)
         if (!isset(args.name)) {
             return "Please, provide a valid name of a bank with '-n <name>'"
         }

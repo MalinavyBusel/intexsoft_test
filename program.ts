@@ -1,4 +1,6 @@
 import { Handler } from "./handlers/handler"
+const BankHandler = require('./handlers/bank/bankHandler')
+const ClientHandler = require('./handlers/client/clientHandler')
 
 const readline = require('node:readline')
 const mongoose = require('mongoose')
@@ -11,14 +13,15 @@ mongoose.connect(url);
 module.exports = class Program {
     mapping: Map<string, Handler>
     constructor(
-        ...handlers
     ) {
-        console.log('constructing program')
         this.mapping = new Map()
+        const bh = new BankHandler()
+        const ch = new ClientHandler()
+        const handlers = [bh, ch]
         for (const handler of handlers) {
             this.mapping.set(handler.handlerName, handler)
         }
-        console.log(this.mapping)
+        this.Serve()
     }
 
     async Serve() {

@@ -15,10 +15,12 @@ const createClient = async ({name, type}) => {
     return c
 }
 const addAccount = async ({name, uuid}) => {
-    const u = await Client.updateOne({name}, { $push: { accounts: uuid } })
+    const c = await Client.updateOne({name}, { $push: { accounts: uuid } })
+    return c
 }
 const delClient = async ({name}) => {
-    const d = await Client.deleteOne({name})
+    const c = await Client.deleteOne({name})
+    return c
 }
 const getClient = async ({name}) => {
     const c = await Client.findOne({name}).populate({

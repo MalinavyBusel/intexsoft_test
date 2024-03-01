@@ -49,11 +49,11 @@ const createBankTransaction = async ({client, amount, from, to}) => {
 const makeBankTransaction = async ({client, amountFrom, amountTo, from, to}) => {
   // didn't use mongoose.startSession().startTransaction(), 
   // bcs needed additional time to configure mongo replset to use transactions
-  const t = await createBankTransaction({client, amount: amountFrom, from, to})  
-  console.log(t)
+  await createBankTransaction({client, amount: amountFrom, from, to})  
             
   await Account.updateOne({uuid: from.uuid}, {$inc: {amount: -amountFrom}})
   await Account.updateOne({uuid: to.uuid}, {$inc: {amount: amountTo}})
+  return 'ok'
 }
 
 const getTransactions = async ({start, end, name}) => {
@@ -67,9 +67,8 @@ const getTransactions = async ({start, end, name}) => {
     obj['$gte'] = new Date(start)
   }
 
-  console.log(obj)
-  const ts = await Transaction.find({client: name, datetime: obj})
-  return ts
+  const t = await Transaction.find({client: name, datetime: obj})
+  return t
 }
 
 export {

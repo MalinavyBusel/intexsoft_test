@@ -172,7 +172,6 @@ No options provided`,
     }
     
     async apply(cmd: string, args: string[]) {
-        console.log(`getting a ${cmd} command`)
         const method = this.mapping.get(cmd)
         if (method == undefined) {
             console.log("No such method for clients")
@@ -251,7 +250,6 @@ No options provided`,
         }
         //check if from-acc is client's
         const from = await getAcc({uuid: UUID.createFromHexString(args.from)})
-        console.log(from)
         const client = await getClient({name: args.clientName})
         if (client.name != from.client) {
             return 'Client can only send money from his own account'
@@ -272,20 +270,14 @@ No options provided`,
             return "Unable to perform operation, not enough money"
         }
         //start transaction with recounting accounts
-        console.log('comissions', beforeComission, afterComission)
         const transac = await makeBankTransaction({client: client.name, amountFrom: afterComission, amountTo: beforeComission, from, to})
         return transac
     }
     private async getTransactions(args: any) {
-        console.log(args)
         const exists = await getClient({name: args.clientName})
         if (exists == null) {
             return 'No such client'
         }
         return await getTransactions({start: args.start, end: args.end, name: args.clientName})
     }
-}
-
-function isset(param: undefined | string): boolean {
-    return param != undefined && param != ''
 }
