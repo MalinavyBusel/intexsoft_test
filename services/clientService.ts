@@ -1,5 +1,6 @@
 const { UUID } = require('mongodb');
 const mongoose = require('mongoose');
+const { inspect } = require('util');
 
 const clientSchema = new mongoose.Schema({
   name: String,
@@ -24,14 +25,19 @@ const getClient = async ({name}) => {
     const c = await Client.findOne({name}).populate({
         path: 'accounts',
         model: 'Account',
-        select: 'bank currency amount',
+        select: 'bank currency amount -_id -__v',
         foreignField: 'uuid',
       })
     return c
 }
 const listClients = async () => { 
-    const clients = await Client.find()
-    return clients
+    const clients = await Client.find().populate({
+        path: 'accounts',
+        model: 'Account',
+        select: 'amount currency -_id -uuid',
+        foreignField: 'uuid',
+      })
+    return inspect(clients, { depth : null })
  }
 
 

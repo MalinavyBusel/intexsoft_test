@@ -1,7 +1,10 @@
 import { parseArgs } from "util"
 import { Handler, methodObj } from "../handler"
+const mongoose = require('mongoose')
+import { parse as uuidParse } from 'uuid'
+import {UUID} from 'mongodb'
 
-import {createAcc, delAccsOfClient} from '../../services/accountService'
+import {createAcc, delAccsOfClient, getAcc, makeBankTransaction} from '../../services/accountService'
 import {
     createClient,
     delClient,
@@ -9,6 +12,7 @@ import {
     listClients,
     addAccount
 } from '../../services/clientService'
+import {get as getBank} from '../../services/bankService'
 
 module.exports =  class ClientHandler implements Handler {
     handlerName: String
@@ -94,6 +98,28 @@ module.exports =  class ClientHandler implements Handler {
             options: {},
             call: this.list,
         }],
+        ["pay", {
+            description: "Runs a transaction from clients account to another",
+            options: {
+                from: {
+                    type: 'string',
+                    short: 'f'
+                },
+                to: {
+                    type: 'string',
+                    short: 't'
+                },
+                clientName: {
+                    type: 'string',
+                    short: 'n'
+                },
+                amount: {
+                    type: 'string',
+                    short: 'a'
+                }
+            },
+            call: this.pay,
+        }],
     ])
     constructor() {
         this.handlerName = 'client'
@@ -137,6 +163,41 @@ module.exports =  class ClientHandler implements Handler {
     }
     private async list(args: any) {
         return await listClients()
+    }
+    private async pay(args: any) {
+        args.amount = Number(args.amount) 
+        if (isNaN(args.amount) || args.amount < 0) {
+            return 'Please, enter valid amount of money'
+        }
+
+        //check if from-acc is client's
+        const from = await getAcc({uuid: UUID.createFromHexString(args.from)})
+        console.log(from)
+        const client = await getClient({name: args.clientName})
+        if (client.name != from.client) {
+            return 'Client can only send money from his own account'
+        }
+        //check if there enough money with comission
+        const beforeComission = args.amount
+        const to = await getAcc({uuid: UUID.createFromHexString(args.to)})
+        if (to.bank != from.bank) {
+            const client_bank = await getBank({name: from.bank})
+            if (client.type == 'individual') {
+                args.amount += client_bank.individual_comission // if needed, may be replaced with += comission/100
+            } else if (client.type == 'entity') {
+                args.amount += client_bank.entity_comission
+            }
+        }
+        const afterComission = args.amount
+        if (from.amount < args.amount) {
+            return "Unable to perform operation, not enough money"
+        }
+        //start transaction with recounting accounts
+        console.log('comissions', beforeComission, afterComission)
+        const t = await makeBankTransaction({client: client.name, amountFrom: afterComission, amountTo: beforeComission, from, to})
+        return t
+
+        //return await createPayment()
     }
 }
 
