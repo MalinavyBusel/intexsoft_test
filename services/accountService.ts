@@ -6,7 +6,6 @@ const accountSchema = new mongoose.Schema({
   currency: String,
   bank: {type: String, ref: 'Bank'},
   client: {type: String, ref: ''},
-  // transactions: [{}]
   amount: Number,
 });
 const Account = mongoose.model('Account', accountSchema);
@@ -16,7 +15,7 @@ const transactionSchema = new mongoose.Schema({
   from: {type: mongoose.Schema.Types.UUID, ref: "Account"},
   to: {type: mongoose.Schema.Types.UUID, ref: "Account"},
   datetime: Date, 
-  client: {type: String, ref: 'Client'},
+  client: {type: String, ref: 'Client'}, // sender-client, dont think reciever is needed here as another field
   amount: Number,
 });
 const Transaction = mongoose.model('Transaction', transactionSchema);
@@ -57,6 +56,22 @@ const makeBankTransaction = async ({client, amountFrom, amountTo, from, to}) => 
   await Account.updateOne({uuid: to.uuid}, {$inc: {amount: amountTo}})
 }
 
+const getTransactions = async ({start, end, name}) => {
+  const obj = {}
+  if (end == undefined || end == '') {
+      obj['$lte'] = new Date()
+  } else {
+      obj['$lte'] = new Date(end)
+  }
+  if (start != undefined && start != '') {
+    obj['$gte'] = new Date(start)
+  }
+
+  console.log(obj)
+  const ts = await Transaction.find({client: name, datetime: obj})
+  return ts
+}
+
 export {
     createAcc,
     delAcc,
@@ -64,5 +79,6 @@ export {
     getAcc,
     listAcc, 
     delAccsOfClient,
-    makeBankTransaction
+    makeBankTransaction,
+    getTransactions
 }

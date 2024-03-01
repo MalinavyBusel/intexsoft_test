@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 import { parse as uuidParse } from 'uuid'
 import {UUID} from 'mongodb'
 
-import {createAcc, delAccsOfClient, getAcc, makeBankTransaction} from '../../services/accountService'
+import {createAcc, delAccsOfClient, getAcc, getTransactions, makeBankTransaction} from '../../services/accountService'
 import {
     createClient,
     delClient,
@@ -99,7 +99,7 @@ module.exports =  class ClientHandler implements Handler {
             call: this.list,
         }],
         ["pay", {
-            description: "Runs a transaction from clients account to another",
+            description: "Runs a transaction from client's account to another",
             options: {
                 from: {
                     type: 'string',
@@ -119,6 +119,24 @@ module.exports =  class ClientHandler implements Handler {
                 }
             },
             call: this.pay,
+        }],
+        ["transactions", {
+            description: "Returns all the transactions made by client",
+            options: {
+                start: {
+                    type: 'string',
+                    short: 's'
+                }, 
+                end: {
+                    type: 'string', 
+                    short: 'e'
+                },
+                clientName: {
+                    type: 'string',
+                    short: 'n'
+                }
+            },
+            call: this.getTransactions,
         }],
     ])
     constructor() {
@@ -198,6 +216,10 @@ module.exports =  class ClientHandler implements Handler {
         return t
 
         //return await createPayment()
+    }
+    private async getTransactions(args: any) {
+        console.log(args)
+        return await getTransactions({start: args.start, end: args.end, name: args.clientName})
     }
 }
 

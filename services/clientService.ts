@@ -6,7 +6,6 @@ const clientSchema = new mongoose.Schema({
   name: String,
   type: String,
   accounts: [{type: UUID, ref: 'Account'}],
-  //transactions: [{type: UUID, ref: 'Transaction'}]
 });
 
 const Client = mongoose.model('Client', clientSchema);
